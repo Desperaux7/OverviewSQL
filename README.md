@@ -162,3 +162,111 @@ SELECT Nome FROM Clientes
 UNION
 SELECT Nome FROM Funcionarios;
 ```
+
+## 11. Funções de Linha Única (Single Row Functions)
+Funções que retornam um único valor por linha.
+
+### Funções de Texto
+```sql
+SELECT 
+    UPPER(nome),
+    LOWER(nome),
+    TRIM(nome),
+    REPLACE(nome, 'a', 'x')
+FROM clientes;
+```
+```sql
+SELECT 
+    LEN(nome),
+    LEFT(nome, 3),
+    RIGHT(nome, 2),
+    SUBSTRING(nome, 2, 4)
+FROM clientes;
+```
+
+### Funções de Data
+
+```sql
+SELECT 
+    DATEADD(DAY, 10, data_venda),
+    DATEDIFF(DAY, data_inicio, data_fim),
+    YEAR(data_venda),
+    MONTH(data_venda),
+    DAY(data_venda)
+FROM vendas;
+```
+```sql
+SELECT FORMAT(data_venda, 'dd/MM/yyyy') FROM vendas;
+```
+
+### Tratamento de Null
+
+```sql
+SELECT 
+    ISNULL(nome, 'Não informado'),
+    COALESCE(nome, sobrenome, 'N/A'),
+    NULLIF(valor1, valor2)
+FROM tabela;
+```
+```sql
+SELECT * FROM tabela
+WHERE coluna IS NULL;
+```
+
+### Lógica Condicional (CASE)
+
+```sql
+SELECT 
+    nome,
+    CASE 
+        WHEN salario > 5000 THEN 'Alto'
+        WHEN salario > 2000 THEN 'Médio'
+        ELSE 'Baixo'
+    END AS nivel_salario
+FROM funcionarios;
+```
+```sql
+SELECT LEN(LOWER(LEFT('Maria', 2)));
+```
+
+## 12. Funções de Agregação e GROUP BY
+Funções que retornam um único valor para um conjunto de linhas.
+
+### Funções Principais
+
+```sql
+SELECT 
+    COUNT(*),
+    SUM(valor),
+    AVG(valor),
+    MAX(valor),
+    MIN(valor)
+FROM vendas;
+```
+
+### GROUP BY
+
+```sql
+SELECT 
+    regiao,
+    SUM(valor) AS total_vendas
+FROM vendas
+GROUP BY regiao;
+```
+
+### Exemplo Prático
+
+```sql
+SELECT 
+    categoria,
+    COUNT(*) AS quantidade,
+    SUM(valor) AS total
+FROM produtos
+GROUP BY categoria;
+```
+
+### Conclusão
+
+Funções de linha única → operam linha a linha
+Funções de agregação → operam em grupos de dados
+GROUP BY → transforma dados brutos em informação estratégica
