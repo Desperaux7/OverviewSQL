@@ -45,6 +45,8 @@ A organização desses bancos segue uma estrutura hierárquica:
 * **Numéricos:** `INT` e `DECIMAL`.
 * **Texto/String:** `CHAR` e `VARCHAR`.
 * **Data e Hora:** `DATE` e `TIME`.
+* **Booleanos:** `BIT` ou `BOOLEAN`.
+* **Grandes Objetos:** `BLOB`, `TEXT` e `CLOB`.
 
 ---
 
@@ -64,40 +66,71 @@ Normalizar um banco de dados é organizar as informações para que cada dado ex
 
 ## 5. As Subdivisões de Comandos SQL
 
-* **DDL (Data Definition Language):** Criar, alterar ou excluir a estrutura.
+* **DDL (Data Definition Language):** Criar, alterar ou excluir estruturas do banco.
 * **DQL (Data Query Language):** Recuperar e consultar dados.
-* **DML (Data Manipulation Language):** Gerenciar e manipular os dados.
-* **DCL (Data Control Language):** Gerenciar permissões (`GRANT`, `REVOKE`).
-* **TCL (Transaction Control Language):** Gerenciar transações (`COMMIT`, `ROLLBACK`).
+* **DML (Data Manipulation Language):** Inserir, atualizar e remover dados.
+* **DCL (Data Control Language):** Gerenciar permissões e acessos.
+* **TCL (Transaction Control Language):** Controlar transações e consistência dos dados.
 
 ---
 
 ## 6. DDL: Definindo o "Esqueleto" do Banco de Dados
+
 Gerencia a estrutura do banco de dados através de três ações principais:
 
-* `CREATE`: Constrói novos objetos (bancos, tabelas ou schemas).
+* `CREATE`: Constrói novos objetos (bancos, tabelas, views, procedures ou schemas).
 * `ALTER`: Modifica a estrutura de um objeto existente.
 * `DROP`: Exclui permanentemente um objeto e todos os registros (altamente destrutivo).
+
+### Exemplo
+
+```sql
+CREATE TABLE Clientes (
+    Id INT PRIMARY KEY,
+    Nome VARCHAR(100),
+    Email VARCHAR(150)
+);
+```
 
 ---
 
 ## 7. DML: Manipulando os Dados
+
 A DML permite gerenciar o conteúdo real armazenado nas tabelas. Trabalhamos com três comandos principais:
 
 | Comando | Ação | Efeito nos Dados |
 | :--- | :--- | :--- |
-| **INSERT** | Adicionar | Novas linhas são criadas. Pode ser feito manualmente (`VALUES`) ou copiando de outra tabela (`INSERT INTO ... SELECT`). |
-| **UPDATE** | Editar | Valores existentes são alterados. Sempre utilize `WHERE` para evitar atualização em massa. |
-| **DELETE** | Remover | Linhas selecionadas são apagadas. Também exige `WHERE` para filtrar linhas específicas. |
+| **INSERT** | Adicionar | Novas linhas são criadas. |
+| **UPDATE** | Editar | Valores existentes são alterados. |
+| **DELETE** | Remover | Linhas selecionadas são apagadas. |
+
+### Exemplos
+
+```sql
+INSERT INTO Clientes (Id, Nome)
+VALUES (1, 'Maria');
+```
+
+```sql
+UPDATE Clientes
+SET Nome = 'Maria Silva'
+WHERE Id = 1;
+```
+
+```sql
+DELETE FROM Clientes
+WHERE Id = 1;
+```
 
 ---
 
 ## 8. DQL: Consultando e Recuperando Dados
+
 O comando principal para buscar dados é o `SELECT`.
 
 ### Anatomia de uma Declaração SQL
 
-* **Comentários (`--`):** Documentam o código.
+* **Comentários (`--`)**: Documentam o código.
 * **Palavras-chave:** Reservadas e com significado especial.
 * **Cláusulas:** Blocos que constroem a instrução.
 * **Funções:** Ferramentas internas que transformam dados.
@@ -107,14 +140,12 @@ O comando principal para buscar dados é o `SELECT`.
 ### Filtros e Organização
 
 * `WHERE`: Filtra registros com condições específicas.
-* `ORDER BY`: Ordena resultados de forma ascendente ou descendente.
-* `DISTINCT`: Remove resultados duplicados.
-* `TOP` / `LIMIT`: Especifica o número de registros retornados.
-* **Aliases (`AS`):** Define nomes temporários para colunas ou tabelas, tornando os resultados mais legíveis.
+* `ORDER BY`: Ordena resultados.
+* `DISTINCT`: Remove duplicidades.
+* `TOP` / `LIMIT`: Limita a quantidade de linhas retornadas.
+* `AS`: Define apelidos para colunas ou tabelas.
 
 ### Ordem Lógica de Processamento
-
-O banco de dados não executa as cláusulas na ordem escrita. A execução lógica padrão é:
 
 1. `FROM`
 2. `WHERE`
@@ -124,38 +155,39 @@ O banco de dados não executa as cláusulas na ordem escrita. A execução lógi
 ---
 
 ## 9. Métodos de Combinação de Dados
+
 Permitem unir informações de múltiplas tabelas ou consultas.
 
 ### JOINS (Adição de Colunas - Horizontal)
 
-Conectamos tabelas lateralmente através de uma coluna comum, geralmente a chave primária e estrangeira.
+* **INNER JOIN:** Apenas correspondências.
+* **LEFT JOIN:** Tudo da esquerda e correspondências da direita.
+* **RIGHT JOIN:** Tudo da direita e correspondências da esquerda.
+* **FULL JOIN:** Todos os registros de ambas as tabelas.
 
-* **Inner Join:** Retorna apenas o que existe correspondência em ambas as tabelas.
-* **Left Join:** Mantém tudo da tabela à esquerda e traz o que houver de correspondência da tabela à direita.
-* **Right Join:** Mantém tudo da tabela à direita e traz o que houver de correspondência da tabela à esquerda.
-* **Full Join:** Traz todos os dados de ambos os lados, independentemente de haver correspondência.
-
-### Exemplo de JOIN
+### Exemplo
 
 ```sql
-SELECT 
-    TabelaA.Nome, 
-    TabelaB.Pais 
-FROM TabelaA 
-INNER JOIN TabelaB ON TabelaA.id = TabelaB.id; -- Especificando a relação
+SELECT
+    A.Nome,
+    B.Pais
+FROM TabelaA A
+INNER JOIN TabelaB B
+ON A.Id = B.Id;
 ```
 
 ---
 
 ## 10. Operadores SET (Adição de Linhas - Vertical)
-Empilhamos resultados de consultas diferentes, desde que ambas tenham exatamente a mesma estrutura de colunas.
 
-UNION: Combina os resultados e remove os registros duplicados.
-UNION ALL: Combina tudo, incluindo os duplicados (é uma operação mais rápida).
-EXCEPT / MINUS: Mostra o que existe exclusivamente no primeiro conjunto, mas não no segundo.
-INTERSECT: Mostra apenas os registros que são comuns a ambos os conjuntos.
+Empilham resultados de consultas compatíveis.
 
-Exemplo de Operador SET:
+* `UNION`: Combina e remove duplicados.
+* `UNION ALL`: Combina mantendo duplicados.
+* `EXCEPT` / `MINUS`: Retorna apenas registros exclusivos da primeira consulta.
+* `INTERSECT`: Retorna apenas registros comuns.
+
+### Exemplo
 
 ```sql
 SELECT Nome FROM Clientes
@@ -163,79 +195,65 @@ UNION
 SELECT Nome FROM Funcionarios;
 ```
 
+---
+
 ## 11. Funções de Linha Única (Single Row Functions)
+
 Funções que retornam um único valor por linha.
 
 ### Funções de Texto
+
 ```sql
-SELECT 
+SELECT
     UPPER(nome),
     LOWER(nome),
     TRIM(nome),
-    REPLACE(nome, 'a', 'x')
-FROM clientes;
-```
-```sql
-SELECT 
-    LEN(nome),
-    LEFT(nome, 3),
-    RIGHT(nome, 2),
-    SUBSTRING(nome, 2, 4)
+    REPLACE(nome,'a','x')
 FROM clientes;
 ```
 
 ### Funções de Data
 
 ```sql
-SELECT 
-    DATEADD(DAY, 10, data_venda),
-    DATEDIFF(DAY, data_inicio, data_fim),
+SELECT
     YEAR(data_venda),
     MONTH(data_venda),
     DAY(data_venda)
 FROM vendas;
 ```
+
+### Tratamento de NULL
+
 ```sql
-SELECT FORMAT(data_venda, 'dd/MM/yyyy') FROM vendas;
+SELECT
+    ISNULL(nome,'Não informado'),
+    COALESCE(nome,sobrenome,'N/A')
+FROM clientes;
 ```
 
-### Tratamento de Null
+### Lógica Condicional
 
 ```sql
-SELECT 
-    ISNULL(nome, 'Não informado'),
-    COALESCE(nome, sobrenome, 'N/A'),
-    NULLIF(valor1, valor2)
-FROM tabela;
-```
-```sql
-SELECT * FROM tabela
-WHERE coluna IS NULL;
-```
-
-### Lógica Condicional (CASE)
-
-```sql
-SELECT 
+SELECT
     nome,
-    CASE 
+    CASE
         WHEN salario > 5000 THEN 'Alto'
         WHEN salario > 2000 THEN 'Médio'
         ELSE 'Baixo'
     END AS nivel_salario
 FROM funcionarios;
 ```
-```sql
-SELECT LEN(LOWER(LEFT('Maria', 2)));
-```
+
+---
 
 ## 12. Funções de Agregação e GROUP BY
+
 Funções que retornam um único valor para um conjunto de linhas.
 
 ### Funções Principais
 
 ```sql
-SELECT 
+SELECT
     COUNT(*),
     SUM(valor),
     AVG(valor),
@@ -247,26 +265,254 @@ FROM vendas;
 ### GROUP BY
 
 ```sql
-SELECT 
+SELECT
     regiao,
     SUM(valor) AS total_vendas
 FROM vendas
 GROUP BY regiao;
 ```
 
-### Exemplo Prático
+### HAVING
+
+Utilizado para filtrar grupos após a agregação.
 
 ```sql
-SELECT 
-    categoria,
-    COUNT(*) AS quantidade,
-    SUM(valor) AS total
-FROM produtos
-GROUP BY categoria;
+SELECT
+    regiao,
+    SUM(valor) AS total_vendas
+FROM vendas
+GROUP BY regiao
+HAVING SUM(valor) > 10000;
 ```
 
-### Conclusão
+---
 
-Funções de linha única → operam linha a linha
-Funções de agregação → operam em grupos de dados
-GROUP BY → transforma dados brutos em informação estratégica
+## 13. Views
+
+Uma View é uma tabela virtual criada a partir de uma consulta SQL. Ela não armazena dados fisicamente (na maioria dos SGBDs), apenas o resultado da consulta.
+
+### Vantagens
+
+* Simplifica consultas complexas.
+* Aumenta a segurança dos dados.
+* Facilita a reutilização de consultas.
+
+### Exemplo
+
+```sql
+CREATE VIEW vw_ClientesAtivos AS
+SELECT
+    Id,
+    Nome,
+    Email
+FROM Clientes
+WHERE Ativo = 1;
+```
+
+Consulta da View:
+
+```sql
+SELECT * FROM vw_ClientesAtivos;
+```
+
+---
+
+## 14. Functions
+
+São rotinas que recebem parâmetros e retornam um valor ou tabela.
+
+### Características
+
+* Reutilização de lógica.
+* Retorno obrigatório.
+* Podem ser utilizadas dentro de consultas.
+
+### Exemplo
+
+```sql
+CREATE FUNCTION fn_CalcularDesconto
+(
+    @Valor DECIMAL(10,2)
+)
+RETURNS DECIMAL(10,2)
+AS
+BEGIN
+    RETURN @Valor * 0.9;
+END;
+```
+
+Uso:
+
+```sql
+SELECT dbo.fn_CalcularDesconto(1000);
+```
+
+---
+
+## 15. Stored Procedures (Procedimentos Armazenados)
+
+São blocos de código SQL armazenados no banco de dados para execução posterior.
+
+### Vantagens
+
+* Reutilização de código.
+* Melhor desempenho.
+* Centralização das regras de negócio.
+
+### Exemplo
+
+```sql
+CREATE PROCEDURE sp_ListarClientes
+AS
+BEGIN
+    SELECT *
+    FROM Clientes;
+END;
+```
+
+Execução:
+
+```sql
+EXEC sp_ListarClientes;
+```
+
+---
+
+## 16. Triggers
+
+São procedimentos executados automaticamente quando determinados eventos ocorrem em uma tabela.
+
+### Eventos Comuns
+
+* `INSERT`
+* `UPDATE`
+* `DELETE`
+
+### Aplicações
+
+* Auditoria.
+* Logs.
+* Validação de regras de negócio.
+
+### Exemplo
+
+```sql
+CREATE TRIGGER trg_LogClientes
+ON Clientes
+AFTER INSERT
+AS
+BEGIN
+    PRINT 'Novo cliente cadastrado';
+END;
+```
+
+---
+
+## 17. DCL (Data Control Language)
+
+Responsável pelo controle de acesso aos objetos do banco.
+
+### Principais Comandos
+
+* `GRANT`: Concede permissões.
+* `REVOKE`: Remove permissões.
+
+### Exemplo
+
+```sql
+GRANT SELECT
+ON Clientes
+TO UsuarioAnalista;
+```
+
+```sql
+REVOKE SELECT
+ON Clientes
+FROM UsuarioAnalista;
+```
+
+### Objetivo
+
+Garantir segurança e controle sobre quem pode visualizar ou modificar informações.
+
+---
+
+## 18. TCL (Transaction Control Language)
+
+Controla transações, garantindo consistência e integridade dos dados.
+
+### Conceito de Transação
+
+Uma transação é um conjunto de operações executadas como uma única unidade lógica de trabalho.
+
+### Principais Comandos
+
+| Comando | Função |
+|----------|----------|
+| `BEGIN TRANSACTION` | Inicia uma transação |
+| `COMMIT` | Confirma as alterações |
+| `ROLLBACK` | Desfaz as alterações |
+| `SAVEPOINT` | Cria um ponto intermediário para retorno |
+
+### Exemplo
+
+```sql
+BEGIN TRANSACTION;
+
+UPDATE Contas
+SET Saldo = Saldo - 100
+WHERE Id = 1;
+
+UPDATE Contas
+SET Saldo = Saldo + 100
+WHERE Id = 2;
+
+COMMIT;
+```
+
+### Exemplo com ROLLBACK
+
+```sql
+BEGIN TRANSACTION;
+
+UPDATE Produtos
+SET Estoque = Estoque - 10
+WHERE Id = 1;
+
+ROLLBACK;
+```
+
+### Relação com ACID
+
+As transações são responsáveis por garantir as propriedades ACID:
+
+* **Atomicidade:** Tudo acontece ou nada acontece.
+* **Consistência:** Mantém regras e integridade.
+* **Isolamento:** Transações não interferem umas nas outras.
+* **Durabilidade:** Alterações confirmadas permanecem salvas mesmo após falhas.
+
+---
+
+## 19. Resumo Geral das Categorias SQL
+
+| Categoria | Objetivo | Principais Comandos |
+|------------|------------|--------------------|
+| DDL | Estrutura | CREATE, ALTER, DROP |
+| DML | Manipulação de Dados | INSERT, UPDATE, DELETE |
+| DQL | Consulta de Dados | SELECT |
+| DCL | Controle de Acesso | GRANT, REVOKE |
+| TCL | Controle de Transações | COMMIT, ROLLBACK, SAVEPOINT |
+
+---
+
+## Conclusão
+
+* **DDL** define a estrutura do banco.
+* **DML** manipula os dados armazenados.
+* **DQL** consulta informações.
+* **DCL** controla permissões e segurança.
+* **TCL** garante consistência através de transações.
+* **Views** simplificam consultas complexas.
+* **Functions** encapsulam cálculos e regras reutilizáveis.
+* **Stored Procedures** automatizam processos e centralizam lógica de negócio.
+* **Triggers** executam ações automáticas em resposta a eventos.
